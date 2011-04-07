@@ -20,7 +20,7 @@ public class G6Pay {
     /**
      * Launch a WebView with offers for the user to click
      */
-    public static void showOffers() {
+    public static void showOffers(String userId) {
         
     }
     
@@ -29,7 +29,7 @@ public class G6Pay {
      * TODO: add documentation for offer states
      * @return null if no offer is completed or the appropriate offer
      */
-    public static OfferDTO getCompletedOffer() {
+    public static OfferDTO getCompletedOffer(String userId) {
         
         return null;
     }
