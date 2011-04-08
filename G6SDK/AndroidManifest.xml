@@ -13,6 +13,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
+        <activity android:name="com.g6pay.view.OffersWebView"
+                  android:configChanges="keyboardHidden|orientation" />
     </application>
 </manifest>

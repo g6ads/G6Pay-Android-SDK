@@ -49,7 +49,7 @@ public class UDID {
      * @param applicationContext
      * @return
      */
-    public static HashMap<String, String> getDeviceId(Context applicationContext) {
+    public static HashMap<String, String> getDeviceId(Context ctx) throws java.lang.SecurityException {
         
         String serialNumber = ""; 
         String telephonyId = "";
@@ -63,12 +63,12 @@ public class UDID {
         }
         
         TelephonyManager tm = (TelephonyManager)
-            applicationContext.getSystemService(Context.TELEPHONY_SERVICE);
+            ctx.getSystemService(Context.TELEPHONY_SERVICE);
 
         if (tm.getDeviceId() != null)
             telephonyId = tm.getDeviceId();
         
-        String aId = Secure.getString(applicationContext.getContentResolver(),
+        String aId = Secure.getString(ctx.getContentResolver(),
                 android.provider.Settings.Secure.ANDROID_ID);
 
         if (aId != null)
