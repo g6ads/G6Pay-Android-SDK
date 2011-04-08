@@ -3,12 +3,16 @@ package com.g6pay.sdk;
 import com.g6pay.constants.G6Params;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import com.g6pay.listener.G6OfferListener;
 import com.g6pay.listener.G6TransactionListener;
 import com.g6pay.listener.G6UserAccountListener;
+import com.g6pay.net.SimpleAsyncHTTPTask;
+import com.g6pay.net.SimpleHTTPRequest;
 import com.g6pay.view.OffersWebView;
 
+import android.Manifest;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -23,7 +27,7 @@ import android.util.Log;
  * @author phsu
  *
  */
-public class G6Pay implements G6AdvertiserIF {
+public class G6Pay implements G6AdvertiserIF, G6PublisherIF {
     private static final String mLogStr = "G6Pay";
 
     private static G6Pay _theInstance = null;
@@ -55,8 +59,13 @@ public class G6Pay implements G6AdvertiserIF {
             Log.e("DEBUG", "packagename is " + ctx.getPackageName());
             if (info != null && info.metaData != null) 
             {
-                // Get the app ID.
-                this.APP_ID = info.metaData.getString(G6Params.ANDROID_MANIFEST_APP_ID);
+                // Get the APP ID and validate it's not empty or missing
+                int appId = info.metaData.getInt(G6Params.ANDROID_MANIFEST_APP_ID);
+                if (appId > 0) {
+                    this.APP_ID = ""+appId;
+                } else {
+                    this.APP_ID = info.metaData.getString(G6Params.ANDROID_MANIFEST_APP_ID);
+                }
                 
                 if (APP_ID == null || APP_ID.trim().equalsIgnoreCase(""))  {
                     Log.e(mLogStr, "Can't find " + G6Params.ANDROID_MANIFEST_APP_ID + 
@@ -65,6 +74,7 @@ public class G6Pay implements G6AdvertiserIF {
                     failed = true;
                 }
 
+                // Get the SECRET KEY and validate it's not empty or missing
                 this.SECRET_KEY = info.metaData.getString(G6Params.ANDROID_MANIFEST_SECRET_KEY);
                 
                 if (SECRET_KEY == null || SECRET_KEY.trim().equalsIgnoreCase(""))  {
@@ -96,6 +106,19 @@ public class G6Pay implements G6AdvertiserIF {
             failed = true;
         }
         
+        if (ctx.getPackageManager().checkPermission(Manifest.permission.ACCESS_NETWORK_STATE, ctx.getPackageName()) != 0) {
+            Log.e(mLogStr, "Network state unavailable.  Please add proper" +
+                    " permission to the android manifest in the <manifest> tag:" +
+                    "\n  <uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\" />");
+            failed = true;
+        }
+        
+        if (ctx.getPackageManager().checkPermission(Manifest.permission.INTERNET, ctx.getPackageName()) != 0) {
+            Log.e(mLogStr, "Internet unavailable.  Please add proper" +
+                    " permission to the android manifest in the <manifest> tag:" +
+                    "\n  <uses-permission android:name=\"android.permission.INTERNET\" />");
+            failed = true;
+        }
         setupCompleted = !failed;
     }
     
@@ -126,21 +149,53 @@ public class G6Pay implements G6AdvertiserIF {
     
     public void creditUser(String transactionId, String userId, float amount,
             G6UserAccountListener listener) {
+        if (!setupCompleted) {
+            Log.e(mLogStr, "SDK setup incomplete.. bailing.  Please fix previous errors");
+            return;
+        }
     }
     
     public void debitUser(String transactionId, String userId, float amount,
             G6UserAccountListener listener) {
+        if (!setupCompleted) {
+            Log.e(mLogStr, "SDK setup incomplete.. bailing.  Please fix previous errors");
+            return;
+        }
     }
     
     public void getAllTransactions(String userId,
             G6TransactionListener listener) {
+        if (!setupCompleted) {
+            Log.e(mLogStr, "SDK setup incomplete.. bailing.  Please fix previous errors");
+            return;
+        }
     }
     
     public void getUserBalance(String userId,
             G6UserAccountListener listener) {
+        if (!setupCompleted) {
+            Log.e(mLogStr, "SDK setup incomplete.. bailing.  Please fix previous errors");
+            return;
+        }
     }
 
     public void installConfirm() {
+        if (!setupCompleted) {
+            Log.e(mLogStr, "SDK setup incomplete.. bailing.  Please fix previous errors");
+            return;
+        }
         
+        LinkedHashMap<String, String> params = new LinkedHashMap<String, String>();
+        params.put(G6Params.G6_PARAM_APP_ID, this.APP_ID);
+        params.put(G6Params.G6_PARAM_PHONE_ID, udids.get(UDID.UDID_TELEPHONY_ID));
+        
+        // Call setup complete.. No need for callback since this should get 
+        // called every time the app starts up
+        SimpleHTTPRequest request = new SimpleHTTPRequest(
+                "http://www.g6pay.com/api/installconfirm", params, 
+                "SHA-256", this.SECRET_KEY);
+        new SimpleAsyncHTTPTask().execute(request);
     }
+    
+
 }

@@ -7,6 +7,9 @@ public class G6Params {
     
     final static public String UDID_MAP                      = "udids";
     
+    final static public String G6_PARAM_APP_ID               = "app_id";
+    final static public String G6_PARAM_UDID                 = "udid";
+    final static public String G6_PARAM_PHONE_ID             = "phone_id";
     final static public String G6_PARAM_USER_ID              = "user_id";
     final static public String G6_PARAM_OFFER_ID             = "offer_id";
     final static public String G6_PARAM_OFFER_NAME           = "offer_name";

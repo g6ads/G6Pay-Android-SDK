@@ -23,23 +23,36 @@ public class BaseActivity extends Activity {
         tv.setId(999);
         r.addView(tv);
         
-        Button tapButton = new Button(getApplicationContext());
-        tapButton.setText("Show me some offers!");
-        tapButton.setOnClickListener(new View.OnClickListener() {
+        Button offersButton = new Button(getApplicationContext());
+        offersButton.setText("Show me some offers!");
+        offersButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 showOfferWall();
             }
         }
         );
-        tapButton.setId(1000);
-        RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
-        lp.addRule(RelativeLayout.BELOW, 999);
-        r.addView(tapButton, lp);
+        offersButton.setId(1000);
+        
+        RelativeLayout.LayoutParams offersButtonLp = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+        offersButtonLp.addRule(RelativeLayout.BELOW, 999);
+        r.addView(offersButton, offersButtonLp);
+        
+        Button confirmButton = new Button(getApplicationContext());
+        confirmButton.setText("Sample confirm");
+        confirmButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                installConfirm();
+            }
+        }
+        );
+        confirmButton.setId(1001);
+        
+        RelativeLayout.LayoutParams confirmButtonLp = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+        confirmButtonLp.addRule(RelativeLayout.BELOW, 1000);
+        r.addView(confirmButton, confirmButtonLp);
         
         setContentView(r);
 
-//        setContentView(R.layout.main);
-        
         
     }
     
@@ -49,4 +62,11 @@ public class BaseActivity extends Activity {
         sdk.showOffers(this.getApplicationContext(), "", null);
         
     }
+    public void installConfirm() {
+        G6Pay sdk = G6Pay.getG6PayInstance(this.getApplicationContext());
+        
+        sdk.installConfirm();
+        
+    }
+
 }
