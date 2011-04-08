@@ -5,6 +5,7 @@ import com.g6pay.sdk.G6Pay;
 import android.app.Activity;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -16,8 +17,14 @@ public class BaseActivity extends Activity {
         super.onCreate(savedInstanceState);
         
         RelativeLayout r = new RelativeLayout(getApplicationContext());
+        
+        TextView tv = new TextView(this);
+        tv.setText("Hello, G6ers");
+        tv.setId(999);
+        r.addView(tv);
+        
         Button tapButton = new Button(getApplicationContext());
-        tapButton.setText("Offer Wall");
+        tapButton.setText("Show me some offers!");
         tapButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 showOfferWall();
@@ -25,14 +32,13 @@ public class BaseActivity extends Activity {
         }
         );
         tapButton.setId(1000);
-        r.addView(tapButton);
+        RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);
+        lp.addRule(RelativeLayout.BELOW, 999);
+        r.addView(tapButton, lp);
         
         setContentView(r);
 
 //        setContentView(R.layout.main);
-//        TextView tv = new TextView(this);
-//        tv.setText("Hello, G6ers");
-//        setContentView(tv);
         
         
     }

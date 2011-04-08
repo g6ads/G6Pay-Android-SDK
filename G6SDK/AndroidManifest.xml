@@ -4,8 +4,19 @@
       android:versionCode="1"
       android:versionName="1.0">
     <uses-sdk android:minSdkVersion="7" />
-
+    <!--  *** G6 Specific Parameters *** -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <!--  *** End G6 Specific Parameters *** -->
     <application android:icon="@drawable/icon" android:label="@string/app_name">
+    
+    
+    <!--  *** G6 Specific Parameters *** -->
+        <activity android:name="com.g6pay.view.OffersWebView"
+                  android:configChanges="keyboardHidden|orientation" />
+        <meta-data android:name="G6_APP_ID" android:value="YOUR_APP_ID_HERE"/>
+        <meta-data android:name="G6_SECRET_KEY" android:value="YOUR_SECRET_KEY_HERE"/>
+    <!--  *** End G6 Specific Parameters *** -->
+    
         <activity android:name=".BaseActivity"
                   android:label="@string/app_name">
             <intent-filter>
@@ -13,7 +24,5 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.g6pay.view.OffersWebView"
-                  android:configChanges="keyboardHidden|orientation" />
     </application>
 </manifest>
