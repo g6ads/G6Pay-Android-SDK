@@ -1,9 +1,9 @@
 package com.g6pay.net;
 
-import java.net.URLEncoder;
-import java.security.MessageDigest;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.Map;
+
+import com.g6pay.util.URLUtil;
 
 import android.util.Log;
 
@@ -16,60 +16,20 @@ import android.util.Log;
 public class SimpleHTTPRequest implements SimpleHTTPListener {
     private String baseURL;
     private LinkedHashMap<String, String>params;
-    private String checksumType;
+    private HashMap<String, String>nonSigParams;
     private String checksumKey;
 
     public SimpleHTTPRequest(String baseURL, LinkedHashMap<String, String> params,
-            String checksumType, String checksumKey) {
+            HashMap<String, String> nonSigParams, String checksumKey) {
         super();
         this.baseURL = baseURL;
         this.params = params;
-        this.checksumType = checksumType;
+        this.nonSigParams = nonSigParams;
         this.checksumKey = checksumKey;
     }
     
     public String getURLString() {
-        
-        StringBuffer b = new StringBuffer(baseURL);
-        
-        MessageDigest md = null;
-        
-        if (params != null && params.size() > 0) {
-            boolean first = true;
-            for (Map.Entry<String, String> entry : params.entrySet()) {
-                if (first) {
-                    b.append("?");
-                    first = false;
-                } else {
-                    b.append("&");
-                }
-                
-                b.append(entry.getKey());
-                b.append("=");
-                b.append(URLEncoder.encode(entry.getValue()));
-            }
-            
-            if (checksumType != null && checksumKey != null) {
-                try {
-                    md = MessageDigest.getInstance(checksumType);
-                    if (md != null) {
-                        for (Map.Entry<String, String> entry : params.entrySet()) {
-                            md.update(entry.getValue().getBytes());
-                        }
-                        md.update(checksumKey.getBytes());
-                    }
-                    
-                    String hex = getHex(md.digest());
-                    
-                    b.append("?signature=");
-                    b.append(URLEncoder.encode(hex));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        
-        return b.toString();
+        return URLUtil.constructG6URL(baseURL, params, nonSigParams, checksumKey);
     }
     
     public void resultBody(String body) {
@@ -80,17 +40,5 @@ public class SimpleHTTPRequest implements SimpleHTTPListener {
         Log.e("DEBUG requestFailed", ""+statusCode);
     }
     
-    static final String HEXES = "0123456789abcdef";
-    public static String getHex( byte [] raw ) {
-        if ( raw == null ) {
-          return null;
-        }
-        final StringBuilder hex = new StringBuilder( 2 * raw.length );
-        for ( final byte b : raw ) {
-          hex.append(HEXES.charAt((b & 0xF0) >> 4))
-             .append(HEXES.charAt((b & 0x0F)));
-        }
-        return hex.toString();
-    }
 }
 

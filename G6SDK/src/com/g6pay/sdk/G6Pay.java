@@ -53,6 +53,7 @@ public class G6Pay implements G6AdvertiserIF, G6PublisherIF {
         
         boolean failed = false;
         try {
+            // Initialize all the parameters from the package
             ApplicationInfo info = manager.getApplicationInfo(ctx.getPackageName(),
                     PackageManager.GET_META_DATA);
             
@@ -134,8 +135,10 @@ public class G6Pay implements G6AdvertiserIF, G6PublisherIF {
         
         try {
             Intent intent = new Intent(ctx, OffersWebView.class);
+            intent.putExtra(G6Params.G6_PARAM_APP_ID, APP_ID);
             intent.putExtra(G6Params.G6_PARAM_USER_ID, userId);
             intent.putExtra(G6Params.UDID_MAP, udids);
+            intent.putExtra(G6Params.G6_PARAM_SECRET_KEY, SECRET_KEY);
             
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             ctx.startActivity(intent);
@@ -153,6 +156,32 @@ public class G6Pay implements G6AdvertiserIF, G6PublisherIF {
             Log.e(mLogStr, "SDK setup incomplete.. bailing.  Please fix previous errors");
             return;
         }
+        
+        LinkedHashMap<String, String> params = new LinkedHashMap<String, String>();
+        params.put(G6Params.G6_PARAM_AMOUNT, ""+amount);
+        params.put(G6Params.G6_PARAM_CREDIT_TRANSACTION_ID, transactionId);
+        params.put(G6Params.G6_PARAM_APP_ID, this.APP_ID);
+        params.put(G6Params.G6_PARAM_USER_ID, userId);
+        params.put(G6Params.G6_PARAM_TIMESTAMP, ""+System.currentTimeMillis()/1000);
+
+        HashMap<String, String> nonSigParams = new HashMap<String, String>();
+        nonSigParams.put(G6Params.G6_PARAM_UDID, udids.get(UDID.UDID_TELEPHONY_ID));
+        nonSigParams.put(G6Params.G6_PARAM_PLATFORM, G6Params.PLATFORM_ID_ANDROID);
+
+        SimpleHTTPRequest request = new SimpleHTTPRequest(
+                "http://www.g6pay.com/api/credit", params, nonSigParams,
+                this.SECRET_KEY) {
+          
+            public void resultBody(String body) {
+                Log.e("DEBUG resultBody", body);
+            }
+
+            public void requestFailed(int statusCode) {
+                Log.e("DEBUG requestFailed", ""+statusCode);
+            }
+        };
+        new SimpleAsyncHTTPTask().execute(request);
+
     }
     
     public void debitUser(String transactionId, String userId, float amount,
@@ -161,6 +190,30 @@ public class G6Pay implements G6AdvertiserIF, G6PublisherIF {
             Log.e(mLogStr, "SDK setup incomplete.. bailing.  Please fix previous errors");
             return;
         }
+        LinkedHashMap<String, String> params = new LinkedHashMap<String, String>();
+        params.put(G6Params.G6_PARAM_AMOUNT, ""+amount);
+        params.put(G6Params.G6_PARAM_DEBIT_TRANSACTION_ID, transactionId);
+        params.put(G6Params.G6_PARAM_APP_ID, this.APP_ID);
+        params.put(G6Params.G6_PARAM_USER_ID, userId);
+        params.put(G6Params.G6_PARAM_TIMESTAMP, ""+System.currentTimeMillis()/1000);
+
+        HashMap<String, String> nonSigParams = new HashMap<String, String>();
+        nonSigParams.put(G6Params.G6_PARAM_UDID, udids.get(UDID.UDID_TELEPHONY_ID));
+        nonSigParams.put(G6Params.G6_PARAM_PLATFORM, G6Params.PLATFORM_ID_ANDROID);
+
+        SimpleHTTPRequest request = new SimpleHTTPRequest(
+                "http://www.g6pay.com/api/debit", params, nonSigParams,
+                this.SECRET_KEY) {
+          
+            public void resultBody(String body) {
+                Log.e("DEBUG resultBody", body);
+            }
+
+            public void requestFailed(int statusCode) {
+                Log.e("DEBUG requestFailed", ""+statusCode);
+            }
+        };
+        new SimpleAsyncHTTPTask().execute(request);
     }
     
     public void getAllTransactions(String userId,
@@ -169,6 +222,28 @@ public class G6Pay implements G6AdvertiserIF, G6PublisherIF {
             Log.e(mLogStr, "SDK setup incomplete.. bailing.  Please fix previous errors");
             return;
         }
+        LinkedHashMap<String, String> params = new LinkedHashMap<String, String>();
+        params.put(G6Params.G6_PARAM_APP_ID, this.APP_ID);
+        params.put(G6Params.G6_PARAM_USER_ID, userId);
+        params.put(G6Params.G6_PARAM_TIMESTAMP, ""+System.currentTimeMillis()/1000);
+
+        HashMap<String, String> nonSigParams = new HashMap<String, String>();
+        nonSigParams.put(G6Params.G6_PARAM_UDID, udids.get(UDID.UDID_TELEPHONY_ID));
+        nonSigParams.put(G6Params.G6_PARAM_PLATFORM, G6Params.PLATFORM_ID_ANDROID);
+        
+        SimpleHTTPRequest request = new SimpleHTTPRequest(
+                "http://www.g6pay.com/api/getalltransactions", params, nonSigParams,
+                this.SECRET_KEY) {
+          
+            public void resultBody(String body) {
+                Log.e("DEBUG resultBody", body);
+            }
+
+            public void requestFailed(int statusCode) {
+                Log.e("DEBUG requestFailed", ""+statusCode);
+            }
+        };
+        new SimpleAsyncHTTPTask().execute(request);
     }
     
     public void getUserBalance(String userId,
@@ -177,6 +252,28 @@ public class G6Pay implements G6AdvertiserIF, G6PublisherIF {
             Log.e(mLogStr, "SDK setup incomplete.. bailing.  Please fix previous errors");
             return;
         }
+        LinkedHashMap<String, String> params = new LinkedHashMap<String, String>();
+        params.put(G6Params.G6_PARAM_APP_ID, this.APP_ID);
+        params.put(G6Params.G6_PARAM_USER_ID, userId);
+        params.put(G6Params.G6_PARAM_TIMESTAMP, ""+System.currentTimeMillis()/1000);
+
+        HashMap<String, String> nonSigParams = new HashMap<String, String>();
+        nonSigParams.put(G6Params.G6_PARAM_UDID, udids.get(UDID.UDID_TELEPHONY_ID));
+        nonSigParams.put(G6Params.G6_PARAM_PLATFORM, G6Params.PLATFORM_ID_ANDROID);
+        
+        SimpleHTTPRequest request = new SimpleHTTPRequest(
+                "http://www.g6pay.com/api/getuserbalance", params, nonSigParams,
+                this.SECRET_KEY) {
+          
+            public void resultBody(String body) {
+                Log.e("DEBUG resultBody", body);
+            }
+
+            public void requestFailed(int statusCode) {
+                Log.e("DEBUG requestFailed", ""+statusCode);
+            }
+        };
+        new SimpleAsyncHTTPTask().execute(request);
     }
 
     public void installConfirm() {
@@ -189,13 +286,42 @@ public class G6Pay implements G6AdvertiserIF, G6PublisherIF {
         params.put(G6Params.G6_PARAM_APP_ID, this.APP_ID);
         params.put(G6Params.G6_PARAM_PHONE_ID, udids.get(UDID.UDID_TELEPHONY_ID));
         
+        HashMap<String, String> nonSigParams = new HashMap<String, String>();
+        nonSigParams.put(G6Params.G6_PARAM_PLATFORM, G6Params.PLATFORM_ID_ANDROID);
+
         // Call setup complete.. No need for callback since this should get 
         // called every time the app starts up
         SimpleHTTPRequest request = new SimpleHTTPRequest(
-                "http://www.g6pay.com/api/installconfirm", params, 
-                "SHA-256", this.SECRET_KEY);
+                "http://www.g6pay.com/api/installconfirm", params, nonSigParams,
+                this.SECRET_KEY);
         new SimpleAsyncHTTPTask().execute(request);
     }
     
+
+    /**
+     * Called when user selects an offer from the offers web view..
+     * @param ctx
+     * @param userId
+     * @param offerId
+     */
+    public static void userDidSelectOffer(Context ctx, String signature) {
+        G6Pay sdk = getG6PayInstance(ctx);
+        if (sdk == null) {
+            Log.e(mLogStr, "Error tracking offers.");
+            return;
+        }
+        
+        sdk.didSelectOffer(signature);
+    }
+
+    public void didCloseOffers() {
+        System.out.println("*** didCloseOffers");
+    }
+    public void didSelectOffer(String signature) {
+        
+        System.out.println("*** didSelectOffer " + signature);
+        // TODO Auto-generated method stub
+        
+    }
 
 }
