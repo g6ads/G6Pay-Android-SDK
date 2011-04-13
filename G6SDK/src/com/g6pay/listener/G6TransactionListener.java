@@ -4,9 +4,14 @@ import java.util.ArrayList;
 
 import com.g6pay.dto.TransactionDTO;
 
-public interface G6TransactionListener {
+public abstract class G6TransactionListener {
 
-    public void getAllTransactionsSuccess(ArrayList<TransactionDTO> transactions);
-    public void getAllTransactionsFail();
+    public void getAllTransactionsSuccess(String userId, ArrayList<TransactionDTO> transactions) {
+        
+    }
+    
+    public void getAllTransactionsFail(String userId) {
+        
+    }
     
 }

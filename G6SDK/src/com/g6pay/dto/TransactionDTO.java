@@ -59,6 +59,13 @@ public class TransactionDTO {
     public void setDescription(String description) {
         this.description = description;
     }
+    @Override
+    public String toString() {
+        return "TransactionDTO [userId=" + userId + ", offerId=" + offerId
+                + ", offerName=" + offerName + ", netPayout=" + netPayout
+                + ", virtualCurrencyAmount=" + virtualCurrencyAmount
+                + ", date=" + date + ", description=" + description + "]";
+    }
     
     
 }

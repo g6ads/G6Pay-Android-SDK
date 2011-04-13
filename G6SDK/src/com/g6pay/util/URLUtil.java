@@ -14,6 +14,10 @@ public class URLUtil {
             String checksumKey) {
         StringBuffer b = new StringBuffer(baseURL);
         
+        // check to see if this has a signature.. if so, add
+        // the signature2 param instead..
+        boolean hasSigKey = false;
+        
         boolean first = true;
         if (sigParams != null && sigParams.size() > 0) {
             for (Map.Entry<String, String> entry : sigParams.entrySet()) {
@@ -27,12 +31,18 @@ public class URLUtil {
                 b.append(entry.getKey());
                 b.append("=");
                 b.append(URLEncoder.encode(entry.getValue()));
+                
+                if (entry.getKey().equals("signature"))
+                    hasSigKey = true;
             }
             
             if (checksumType != null && checksumKey != null) {
                 String sig = constructSignature(sigParams, checksumKey);
                 if (sig != null) {
-                    b.append("&signature=");
+                    if (hasSigKey)
+                        b.append("&signature2=");
+                    else
+                        b.append("&signature=");
                     b.append(URLEncoder.encode(sig));
                 }
             }

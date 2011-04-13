@@ -1,7 +1,10 @@
 package com.g6pay.sdk;
 
 import com.g6pay.constants.G6Params;
+import com.g6pay.dto.OfferDTO;
+import com.g6pay.dto.TransactionDTO;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
@@ -10,6 +13,7 @@ import com.g6pay.listener.G6TransactionListener;
 import com.g6pay.listener.G6UserAccountListener;
 import com.g6pay.net.SimpleAsyncHTTPTask;
 import com.g6pay.net.SimpleHTTPRequest;
+import com.g6pay.util.ResponseParser;
 import com.g6pay.view.OffersWebView;
 
 import android.Manifest;
@@ -19,6 +23,7 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.os.Handler;
 import android.util.Log;
 
 /**
@@ -34,6 +39,8 @@ public class G6Pay implements G6AdvertiserIF, G6PublisherIF {
     private String APP_ID = null;
     private String SECRET_KEY = null;
     private boolean setupCompleted = false;
+    
+    private G6OfferListener offerListener;
     
     private HashMap<String, String> udids = null;
     
@@ -57,7 +64,7 @@ public class G6Pay implements G6AdvertiserIF, G6PublisherIF {
             ApplicationInfo info = manager.getApplicationInfo(ctx.getPackageName(),
                     PackageManager.GET_META_DATA);
             
-            Log.e("DEBUG", "packagename is " + ctx.getPackageName());
+            // Log.d(mLogStr, "packagename is " + ctx.getPackageName());
             if (info != null && info.metaData != null) 
             {
                 // Get the APP ID and validate it's not empty or missing
@@ -142,6 +149,8 @@ public class G6Pay implements G6AdvertiserIF, G6PublisherIF {
             
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             ctx.startActivity(intent);
+            
+            offerListener = listener;
         } catch (ActivityNotFoundException ex) {
             Log.e(mLogStr, "Error launching offer webview.  Please add activity" +
                     " to the android manifest in the <application> tag:" +
@@ -150,8 +159,63 @@ public class G6Pay implements G6AdvertiserIF, G6PublisherIF {
 
     }
     
-    public void creditUser(String transactionId, String userId, float amount,
-            G6UserAccountListener listener) {
+    private void retryIsCompleted(final SimpleHTTPRequest request) {
+        // Log.d(mLogStr, "retrying iscompleted");
+        // Wait 5 seconds then poll again..
+        Handler handler = new Handler();
+
+        Runnable runnable = new Runnable() {
+            public void run() {
+                new SimpleAsyncHTTPTask().execute(request);        
+            }
+
+        };
+        handler.postDelayed(runnable, 5000);
+    }
+    
+    /**
+     * Private because it's automatically called when offer wall offer is selected
+     * @param signature
+     * @param listener
+     */
+    private void isCompleted(String signature, final G6OfferListener listener) {
+        
+        LinkedHashMap<String, String> params = new LinkedHashMap<String, String>();
+        params.put(G6Params.G6_PARAM_SIGNATURE, signature);
+
+        HashMap<String, String> nonSigParams = new HashMap<String, String>();
+        nonSigParams.put(G6Params.G6_PARAM_PLATFORM, G6Params.PLATFORM_ID_ANDROID);
+        
+        SimpleHTTPRequest request = new SimpleHTTPRequest(
+                "http://www.g6pay.com/api/iscompleted", params, nonSigParams,
+                this.SECRET_KEY) {
+          
+            public void resultBody(String body) {
+                // Log.d(mLogStr, body);
+                if (listener == null) return;
+                
+                if (body != null) {
+                    OfferDTO offer = ResponseParser.parseOffer(body);
+                    if (offer != null) {
+                        listener.offerWasCompleted(offer);
+                        return;
+                    }
+                }
+                retryIsCompleted(this);
+            }
+
+            public void requestFailed(int statusCode) {
+                // Log.d(mLogStr, ""+statusCode);
+                if (listener == null) return;
+                
+                retryIsCompleted(this);
+            }
+        };
+        new SimpleAsyncHTTPTask().execute(request);        
+    }
+    
+    public void creditUser(final String transactionId, final String userId, final float amount,
+            final G6UserAccountListener listener) {
         if (!setupCompleted) {
             Log.e(mLogStr, "SDK setup incomplete.. bailing.  Please fix previous errors");
             return;
@@ -164,28 +228,35 @@ public class G6Pay implements G6AdvertiserIF, G6PublisherIF {
         params.put(G6Params.G6_PARAM_USER_ID, userId);
         params.put(G6Params.G6_PARAM_TIMESTAMP, ""+System.currentTimeMillis()/1000);
 
-        HashMap<String, String> nonSigParams = new HashMap<String, String>();
-        nonSigParams.put(G6Params.G6_PARAM_UDID, udids.get(UDID.UDID_TELEPHONY_ID));
-        nonSigParams.put(G6Params.G6_PARAM_PLATFORM, G6Params.PLATFORM_ID_ANDROID);
-
         SimpleHTTPRequest request = new SimpleHTTPRequest(
-                "http://www.g6pay.com/api/credit", params, nonSigParams,
+                "http://www.g6pay.com/api/credit", params, null,
                 this.SECRET_KEY) {
           
             public void resultBody(String body) {
-                Log.e("DEBUG resultBody", body);
+                // Log.d(mLogStr, body);
+                if (listener == null) return;
+                
+                if (body != null && body.trim().equalsIgnoreCase("success")) {
+                    listener.creditUserSuccess(userId, transactionId, amount);
+                    return;
+                }
+                
+                listener.creditUserFailure(userId, transactionId, amount);
             }
 
             public void requestFailed(int statusCode) {
-                Log.e("DEBUG requestFailed", ""+statusCode);
+                // Log.d(mLogStr, ""+statusCode);
+                if (listener == null) return;
+
+                listener.creditUserFailure(userId, transactionId, amount);
             }
         };
         new SimpleAsyncHTTPTask().execute(request);
 
     }
     
-    public void debitUser(String transactionId, String userId, float amount,
-            G6UserAccountListener listener) {
+    public void debitUser(final String transactionId, final String userId, final float amount,
+            final G6UserAccountListener listener) {
         if (!setupCompleted) {
             Log.e(mLogStr, "SDK setup incomplete.. bailing.  Please fix previous errors");
             return;
@@ -197,27 +268,34 @@ public class G6Pay implements G6AdvertiserIF, G6PublisherIF {
         params.put(G6Params.G6_PARAM_USER_ID, userId);
         params.put(G6Params.G6_PARAM_TIMESTAMP, ""+System.currentTimeMillis()/1000);
 
-        HashMap<String, String> nonSigParams = new HashMap<String, String>();
-        nonSigParams.put(G6Params.G6_PARAM_UDID, udids.get(UDID.UDID_TELEPHONY_ID));
-        nonSigParams.put(G6Params.G6_PARAM_PLATFORM, G6Params.PLATFORM_ID_ANDROID);
-
         SimpleHTTPRequest request = new SimpleHTTPRequest(
-                "http://www.g6pay.com/api/debit", params, nonSigParams,
+                "http://www.g6pay.com/api/debit", params, null,
                 this.SECRET_KEY) {
           
             public void resultBody(String body) {
-                Log.e("DEBUG resultBody", body);
+                // Log.d(mLogStr, body);
+                if (listener == null) return;
+                
+                if (body != null && body.trim().equalsIgnoreCase("success")) {
+                    listener.debitUserSuccess(userId, transactionId, amount);
+                    return;
+                }
+                
+                listener.debitUserFailure(userId, transactionId, amount);
             }
 
             public void requestFailed(int statusCode) {
-                Log.e("DEBUG requestFailed", ""+statusCode);
+                // Log.d(mLogStr, ""+statusCode);
+                if (listener == null) return;
+
+                listener.debitUserFailure(userId, transactionId, amount);
             }
         };
         new SimpleAsyncHTTPTask().execute(request);
     }
     
-    public void getAllTransactions(String userId,
-            G6TransactionListener listener) {
+    public void getAllTransactions(final String userId,
+            final G6TransactionListener listener) {
         if (!setupCompleted) {
             Log.e(mLogStr, "SDK setup incomplete.. bailing.  Please fix previous errors");
             return;
@@ -227,27 +305,37 @@ public class G6Pay implements G6AdvertiserIF, G6PublisherIF {
         params.put(G6Params.G6_PARAM_USER_ID, userId);
         params.put(G6Params.G6_PARAM_TIMESTAMP, ""+System.currentTimeMillis()/1000);
 
-        HashMap<String, String> nonSigParams = new HashMap<String, String>();
-        nonSigParams.put(G6Params.G6_PARAM_UDID, udids.get(UDID.UDID_TELEPHONY_ID));
-        nonSigParams.put(G6Params.G6_PARAM_PLATFORM, G6Params.PLATFORM_ID_ANDROID);
-        
         SimpleHTTPRequest request = new SimpleHTTPRequest(
-                "http://www.g6pay.com/api/getalltransactions", params, nonSigParams,
+                "http://www.g6pay.com/api/getalltransactions", params, null,
                 this.SECRET_KEY) {
           
             public void resultBody(String body) {
-                Log.e("DEBUG resultBody", body);
+                // Log.d(mLogStr, body);
+                
+                if (listener == null) return;
+                
+                if (body != null) {
+                    ArrayList<TransactionDTO> transactions = ResponseParser.parseTransactions(body);
+                    if (transactions != null) {
+                        listener.getAllTransactionsSuccess(userId, transactions);
+                        return;
+                    }
+                }
+                listener.getAllTransactionsFail(userId);
             }
 
             public void requestFailed(int statusCode) {
-                Log.e("DEBUG requestFailed", ""+statusCode);
+                // Log.d(mLogStr, ""+statusCode);
+                if (listener == null) return;
+                
+                listener.getAllTransactionsFail(userId);
             }
         };
         new SimpleAsyncHTTPTask().execute(request);
     }
     
-    public void getUserBalance(String userId,
-            G6UserAccountListener listener) {
+    public void getUserBalance(final String userId,
+            final G6UserAccountListener listener) {
         if (!setupCompleted) {
             Log.e(mLogStr, "SDK setup incomplete.. bailing.  Please fix previous errors");
             return;
@@ -257,20 +345,30 @@ public class G6Pay implements G6AdvertiserIF, G6PublisherIF {
         params.put(G6Params.G6_PARAM_USER_ID, userId);
         params.put(G6Params.G6_PARAM_TIMESTAMP, ""+System.currentTimeMillis()/1000);
 
-        HashMap<String, String> nonSigParams = new HashMap<String, String>();
-        nonSigParams.put(G6Params.G6_PARAM_UDID, udids.get(UDID.UDID_TELEPHONY_ID));
-        nonSigParams.put(G6Params.G6_PARAM_PLATFORM, G6Params.PLATFORM_ID_ANDROID);
-        
         SimpleHTTPRequest request = new SimpleHTTPRequest(
-                "http://www.g6pay.com/api/getuserbalance", params, nonSigParams,
+                "http://www.g6pay.com/api/getuserbalance", params, null,
                 this.SECRET_KEY) {
           
             public void resultBody(String body) {
-                Log.e("DEBUG resultBody", body);
+                // Log.d(mLogStr, body);
+                if (listener == null) return;
+                
+                if (body != null) {
+                    try {
+                        float balance = ResponseParser.balanceFromResponse(body);
+                        listener.getUserBalanceSuccess(userId, balance);
+                        return;
+                    } catch (Exception ex) {
+                    }
+                }
+                listener.getUserBalanceFail(userId);
             }
 
             public void requestFailed(int statusCode) {
-                Log.e("DEBUG requestFailed", ""+statusCode);
+                // Log.d(mLogStr, ""+statusCode);
+                if (listener == null) return;
+
+                listener.getUserBalanceFail(userId);
             }
         };
         new SimpleAsyncHTTPTask().execute(request);
@@ -299,13 +397,20 @@ public class G6Pay implements G6AdvertiserIF, G6PublisherIF {
     
 
     // Callbacks from offers page
-    
     public void didCloseOffers() {
-        System.out.println("*** didCloseOffers");
+        // Currently nothing to note here..
+        offerListener = null;
     }
     
+    
+
     public void didSelectOffer(String signature) {
-        System.out.println("*** didSelectOffer " + signature);
+        // Don't bother tracking if there's no one to notify..
+        if (offerListener == null) return;
+        
+        // otherwise, start polling by calling isCompleted
+        this.isCompleted(signature, offerListener);
+        
     }
 
 }

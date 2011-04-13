@@ -56,6 +56,14 @@ public class OfferDTO {
     public void setSignature(String signature) {
         this.signature = signature;
     }
+    @Override
+    public String toString() {
+        return "OfferDTO [userId=" + userId + ", offerId=" + offerId
+                + ", offerName=" + offerName + ", netPayout=" + netPayout
+                + ", virtualCurrencyAmount=" + virtualCurrencyAmount
+                + ", userBalance=" + userBalance + ", signature=" + signature
+                + "]";
+    }
 
     
 }

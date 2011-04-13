@@ -10,7 +10,6 @@ import java.net.ProtocolException;
 import java.net.URL;
 
 import android.os.AsyncTask;
-import android.util.Log;
 
 /**
  * Really simple async http task.  Performs a call and returns the body if
@@ -38,7 +37,7 @@ public class SimpleAsyncHTTPTask extends AsyncTask<SimpleHTTPRequest, Void, Simp
       
         try {
             
-            Log.d("G6Pay", "URL:"+request.getURLString());
+            // Log.d("G6Pay", "URL:"+request.getURLString());
             
             serverAddress = new URL(request.getURLString());
             connection = null;
@@ -65,8 +64,7 @@ public class SimpleAsyncHTTPTask extends AsyncTask<SimpleHTTPRequest, Void, Simp
             }
             
             SimpleHTTPResult result = new SimpleHTTPResult();
-            Log.d("G6Pay", "Response:" + connection.getResponseCode() + ":" +
-                    connection.getResponseMessage());
+            // Log.d("G6Pay", "Response:" + connection.getResponseCode() + ":" + connection.getResponseMessage());
             result.setResponseCode(connection.getResponseCode());
             result.setResponseMessage(connection.getResponseMessage());
             result.setResponseBody(sb.toString());
