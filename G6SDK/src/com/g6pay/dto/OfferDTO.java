@@ -2,7 +2,7 @@ package com.g6pay.dto;
 
 /**
  * DTO with details of an offer in progress or completed by the user.
- * @author phsu
+ * @author Peter Hsu - silversc3@yahoo.com
  *
  */
 public class OfferDTO {

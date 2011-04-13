@@ -14,7 +14,10 @@ import android.os.AsyncTask;
 /**
  * Really simple async http task.  Performs a call and returns the body if
  * successful otherwise, notifies of a failed result..
- * @author phsu
+ * 
+ * For G6Pay SDK internal consumption
+ * 
+ * @author Peter Hsu - silversc3@yahoo.com
  *
  */
 public class SimpleAsyncHTTPTask extends AsyncTask<SimpleHTTPRequest, Void, SimpleHTTPResult> {

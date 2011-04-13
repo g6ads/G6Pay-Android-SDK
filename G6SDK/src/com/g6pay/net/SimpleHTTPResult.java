@@ -1,5 +1,13 @@
 package com.g6pay.net;
 
+/**
+ * Basic HTTP result with status code, status message, and body
+ * 
+ * For G6Pay SDK internal consumption
+ * 
+ * @author Peter Hsu - silversc3@yahoo.com
+ *
+ */
 public class SimpleHTTPResult {
     private int responseCode;
     private String responseBody;

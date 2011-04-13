@@ -5,6 +5,12 @@ import java.security.MessageDigest;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * Some G6 specific URL parsing/constructing
+ * 
+ * @author Peter Hsu - silversc3@yahoo.com
+ *
+ */
 public class URLUtil {
 
     private final static String checksumType = "SHA-256";

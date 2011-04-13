@@ -14,7 +14,6 @@ import com.g6pay.listener.G6UserAccountListener;
 import com.g6pay.net.SimpleAsyncHTTPTask;
 import com.g6pay.net.SimpleHTTPRequest;
 import com.g6pay.util.ResponseParser;
-import com.g6pay.view.OffersWebView;
 
 import android.Manifest;
 import android.content.ActivityNotFoundException;
@@ -27,9 +26,44 @@ import android.os.Handler;
 import android.util.Log;
 
 /**
+ * 
+ * The G6 Pay SDK.  This class provides all the methods for interacting
+ * with a user's account, etc.
+ * 
+ * <pre>
+ * <b>Sample install confirm:</b>
+ * 
+        G6Pay sdk = G6Pay.getG6PayInstance(this.getApplicationContext());
+
+        sdk.installConfirm();
+
+ *
+ * <b>Sample offerwall showing:</b>
+ * 
+        G6Pay sdk = G6Pay.getG6PayInstance(this.getApplicationContext());
+
+        G6OfferListener listener = new G6OfferListener() {
+            public void offerWasCompleted(OfferDTO offer) {
+                // handle offer completion (implement this yourself)
+                offerCompleted(offer);
+            }
+        };
+        
+        sdk.showOffers(this.getApplicationContext(), "USERIDHERE", listener);
+ *
+ * 
  * Notes:
- * <activity android:name="com.g6pay.view.OffersWebView" android:configChanges="keyboardHidden|orientation" />
- * @author phsu
+ * <activity android:name="com.g6pay.sdk.OffersWebView" android:configChanges="keyboardHidden|orientation" />
+ * 
+ * </pre>
+ * 
+ * See appropriate Listener classes for how to receive notifications of events.
+ * 
+ * @see com.g6pay.listener.G6OfferListener
+ * @see com.g6pay.listener.G6TransactionListener
+ * @see com.g6pay.listener.G6UserAccountListener
+ * 
+ * @author Peter Hsu - silversc3@yahoo.com
  *
  */
 public class G6Pay implements G6AdvertiserIF, G6PublisherIF {
@@ -44,6 +78,11 @@ public class G6Pay implements G6AdvertiserIF, G6PublisherIF {
     
     private HashMap<String, String> udids = null;
     
+    /**
+     * Get the singleton instance of the G6Pay SDK.
+     * @param ctx The application context of this application
+     * @return The G6Pay instance
+     */
     public static G6Pay getG6PayInstance(Context ctx) {
         
         if (_theInstance == null) {
@@ -53,7 +92,7 @@ public class G6Pay implements G6AdvertiserIF, G6PublisherIF {
         return _theInstance;
     }
     
-    public G6Pay(Context ctx) {
+    private G6Pay(Context ctx) {
         // This will set the APPID, UDIDS
         
         PackageManager manager = ctx.getPackageManager();
@@ -131,7 +170,11 @@ public class G6Pay implements G6AdvertiserIF, G6PublisherIF {
     }
     
     /**
-     * Launch a WebView with offers for the user to click
+     * Show a new WebView activity that displays all the available offers for
+     * the user to complete.
+     * @param ctx The application context
+     * @param userId The unique user Id of this user in your application
+     * @param listener The optional listener to receive event notifications
      */
     public void showOffers(Context ctx, String userId,
             G6OfferListener listener) {
@@ -154,7 +197,7 @@ public class G6Pay implements G6AdvertiserIF, G6PublisherIF {
         } catch (ActivityNotFoundException ex) {
             Log.e(mLogStr, "Error launching offer webview.  Please add activity" +
                     " to the android manifest in the <application> tag:" +
-                    "\n  <activity android:name=\"com.g6pay.view.OffersWebView\" android:configChanges=\"keyboardHidden|orientation\" />");
+                    "\n  <activity android:name=\"com.g6pay.sdk.OffersWebView\" android:configChanges=\"keyboardHidden|orientation\" />");
         }
 
     }
@@ -187,7 +230,7 @@ public class G6Pay implements G6AdvertiserIF, G6PublisherIF {
         nonSigParams.put(G6Params.G6_PARAM_PLATFORM, G6Params.PLATFORM_ID_ANDROID);
         
         SimpleHTTPRequest request = new SimpleHTTPRequest(
-                "http://www.g6pay.com/api/iscompleted", params, nonSigParams,
+                G6Params.G6_API_URL_ISCOMPLETED, params, nonSigParams,
                 this.SECRET_KEY) {
           
             public void resultBody(String body) {
@@ -214,6 +257,13 @@ public class G6Pay implements G6AdvertiserIF, G6PublisherIF {
         new SimpleAsyncHTTPTask().execute(request);        
     }
     
+    /**
+     * Credit a user's virtual currency account at G6.
+     * @param transactionId The unique transaction Id that identifies this transaction
+     * @param amount The amount to credit to the user
+     * @param userId The unique user Id of this user in your application
+     * @param listener The optional listener to receive event notifications
+     */
     public void creditUser(final String transactionId, final String userId, final float amount,
             final G6UserAccountListener listener) {
         if (!setupCompleted) {
@@ -229,7 +279,7 @@ public class G6Pay implements G6AdvertiserIF, G6PublisherIF {
         params.put(G6Params.G6_PARAM_TIMESTAMP, ""+System.currentTimeMillis()/1000);
 
         SimpleHTTPRequest request = new SimpleHTTPRequest(
-                "http://www.g6pay.com/api/credit", params, null,
+                G6Params.G6_API_URL_CREDIT, params, null,
                 this.SECRET_KEY) {
           
             public void resultBody(String body) {
@@ -255,6 +305,13 @@ public class G6Pay implements G6AdvertiserIF, G6PublisherIF {
 
     }
     
+    /**
+     * Debits a user's virtual currency account at G6.
+     * @param transactionId The unique transaction Id that identifies this transaction
+     * @param amount The amount to debit to the user
+     * @param userId The unique user Id of this user in your application
+     * @param listener The optional listener to receive event notifications
+     */
     public void debitUser(final String transactionId, final String userId, final float amount,
             final G6UserAccountListener listener) {
         if (!setupCompleted) {
@@ -269,7 +326,7 @@ public class G6Pay implements G6AdvertiserIF, G6PublisherIF {
         params.put(G6Params.G6_PARAM_TIMESTAMP, ""+System.currentTimeMillis()/1000);
 
         SimpleHTTPRequest request = new SimpleHTTPRequest(
-                "http://www.g6pay.com/api/debit", params, null,
+                G6Params.G6_API_URL_DEBIT, params, null,
                 this.SECRET_KEY) {
           
             public void resultBody(String body) {
@@ -294,6 +351,11 @@ public class G6Pay implements G6AdvertiserIF, G6PublisherIF {
         new SimpleAsyncHTTPTask().execute(request);
     }
     
+    /**
+     * Get the transactions that have been completed for this user at G6.
+     * @param userId The unique user Id of this user in your application
+     * @param listener The optional listener to receive event notifications
+     */
     public void getAllTransactions(final String userId,
             final G6TransactionListener listener) {
         if (!setupCompleted) {
@@ -306,7 +368,7 @@ public class G6Pay implements G6AdvertiserIF, G6PublisherIF {
         params.put(G6Params.G6_PARAM_TIMESTAMP, ""+System.currentTimeMillis()/1000);
 
         SimpleHTTPRequest request = new SimpleHTTPRequest(
-                "http://www.g6pay.com/api/getalltransactions", params, null,
+                G6Params.G6_API_URL_TRANSACTIONS, params, null,
                 this.SECRET_KEY) {
           
             public void resultBody(String body) {
@@ -334,6 +396,11 @@ public class G6Pay implements G6AdvertiserIF, G6PublisherIF {
         new SimpleAsyncHTTPTask().execute(request);
     }
     
+    /**
+     * Get the current user's balance at G6.
+     * @param userId The unique user Id of this user in your application
+     * @param listener The optional listener to receive event notifications
+     */
     public void getUserBalance(final String userId,
             final G6UserAccountListener listener) {
         if (!setupCompleted) {
@@ -346,7 +413,7 @@ public class G6Pay implements G6AdvertiserIF, G6PublisherIF {
         params.put(G6Params.G6_PARAM_TIMESTAMP, ""+System.currentTimeMillis()/1000);
 
         SimpleHTTPRequest request = new SimpleHTTPRequest(
-                "http://www.g6pay.com/api/getuserbalance", params, null,
+                G6Params.G6_API_URL_BALANCE, params, null,
                 this.SECRET_KEY) {
           
             public void resultBody(String body) {
@@ -374,6 +441,10 @@ public class G6Pay implements G6AdvertiserIF, G6PublisherIF {
         new SimpleAsyncHTTPTask().execute(request);
     }
 
+    /**
+     * Confirm that this app was installed.  This is required for using
+     * G6 Pay Per Install
+     */
     public void installConfirm() {
         if (!setupCompleted) {
             Log.e(mLogStr, "SDK setup incomplete.. bailing.  Please fix previous errors");
@@ -390,21 +461,21 @@ public class G6Pay implements G6AdvertiserIF, G6PublisherIF {
         // Call setup complete.. No need for callback since this should get 
         // called every time the app starts up
         SimpleHTTPRequest request = new SimpleHTTPRequest(
-                "http://www.g6pay.com/api/installconfirm", params, nonSigParams,
+                G6Params.G6_API_URL_INSTALLCONFIRM, params, nonSigParams,
                 this.SECRET_KEY);
         new SimpleAsyncHTTPTask().execute(request);
     }
     
 
     // Callbacks from offers page
-    public void didCloseOffers() {
+    protected void didCloseOffers() {
         // Currently nothing to note here..
         offerListener = null;
     }
     
     
 
-    public void didSelectOffer(String signature) {
+    protected void didSelectOffer(String signature) {
         // Don't bother tracking if there's no one to notify..
         if (offerListener == null) return;
         

@@ -1,7 +1,34 @@
 package com.g6pay.constants;
 
+/**
+ * Constants for the G6Pay platform.
+ * 
+ * Android Manifest params are prefixed with ANDROID_MANIFEST_
+ * HTTP params are prefixed with G6_PARAM_
+ * G6 API URLs are prefixed with G6_API_URL_
+ * 
+ * @author Peter Hsu - silversc3@yahoo.com
+ *
+ */
 public class G6Params {
-
+    public static final String G6_API_URL_INSTALLCONFIRM =     
+        "http://www.g6pay.com/api/installconfirm";
+    
+    public static final String G6_API_URL_OFFERWALL =
+        "http://www.g6pay.com/api/buycurrency";
+    public static final String G6_API_URL_ISCOMPLETED =
+        "http://www.g6pay.com/api/iscompleted";
+    
+    public static final String G6_API_URL_CREDIT = 
+        "http://www.g6pay.com/api/credit";
+    public static final String G6_API_URL_DEBIT = 
+        "http://www.g6pay.com/api/debit";
+    public static final String G6_API_URL_BALANCE =  
+        "http://www.g6pay.com/api/getuserbalance";
+    
+    public static final String G6_API_URL_TRANSACTIONS =      
+        "http://www.g6pay.com/api/getalltransactions";
+    
     public static final String ANDROID_MANIFEST_APP_ID         = "G6_APP_ID";
     public static final String ANDROID_MANIFEST_SECRET_KEY     = "G6_SECRET_KEY";
     

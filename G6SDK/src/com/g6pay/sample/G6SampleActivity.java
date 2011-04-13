@@ -21,7 +21,15 @@ import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-public class BaseActivity extends Activity {
+/**
+ * Sample Activity that utilizes all the methods of the G6Pay SDK.
+ * 
+ * @see com.g6pay.sdk.G6Pay
+ * 
+ * @author Peter Hsu - silversc3@yahoo.com
+ *
+ */
+public class G6SampleActivity extends Activity {
     
     private EditText creditValue;
     private EditText debitValue;

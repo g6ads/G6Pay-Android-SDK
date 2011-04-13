@@ -9,8 +9,10 @@ import com.g6pay.dto.OfferDTO;
 import com.g6pay.dto.TransactionDTO;
 
 /**
- * A hacky, specific JSON implementation to avoid bloating SDK download size.
- * Use this class at your own risk. Seriously.
+ * G6 Response parsing.
+ * 
+ * Note: There is a hacky, specific JSON implementation to avoid bloating SDK 
+ * download size.  Use this class at your own risk. Seriously.
  * 
  * @author tooembarrassedtosay
  * 

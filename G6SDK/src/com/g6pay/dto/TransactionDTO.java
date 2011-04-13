@@ -3,8 +3,8 @@ package com.g6pay.dto;
 import java.util.Date;
 
 /**
- * Holds data regarding an individual transaction made by the user.
- * @author phsu
+ * DTO with data regarding an individual transaction made by the user.
+ * @author Peter Hsu - silversc3@yahoo.com
  *
  */
 public class TransactionDTO {

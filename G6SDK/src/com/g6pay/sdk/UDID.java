@@ -11,7 +11,8 @@ import android.telephony.TelephonyManager;
 
 /**
  * Class providing information about the unique identifiers of a device.
- * @author phsu
+ * 
+ * @author Peter Hsu - silversc3@yahoo.com
  *
  */
 public class UDID {

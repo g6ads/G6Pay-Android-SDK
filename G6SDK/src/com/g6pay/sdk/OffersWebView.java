@@ -1,4 +1,4 @@
-package com.g6pay.view;
+package com.g6pay.sdk;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -28,6 +28,13 @@ import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+/**
+ * The Activity that shows the current available offers.  This is launched
+ * when the showOffers() method is called.
+ * 
+ * @author Peter Hsu - silversc3@yahoo.com
+ *
+ */
 public class OffersWebView extends Activity {
 
     private ProgressBar progressBar;
@@ -122,8 +129,7 @@ public class OffersWebView extends Activity {
             }
         });
         
-        // TODO: error handling..
-        String baseURL = "http://www.g6pay.com/api/buycurrency";
+        String baseURL = G6Params.G6_API_URL_OFFERWALL;
         LinkedHashMap<String, String> params = new LinkedHashMap<String, String>();
         
         params.put(G6Params.G6_PARAM_APP_ID, extras.getString(G6Params.G6_PARAM_APP_ID));

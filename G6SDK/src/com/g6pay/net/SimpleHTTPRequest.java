@@ -10,7 +10,10 @@ import android.util.Log;
 /**
  * Simple class used to make requests.. Override resultBody and requestFailed
  * if you want to do anything special..
- * @author phsu
+ * 
+ * For G6Pay SDK internal consumption
+ * 
+ * @author Peter Hsu - silversc3@yahoo.com
  *
  */
 public class SimpleHTTPRequest implements SimpleHTTPListener {
