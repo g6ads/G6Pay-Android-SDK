@@ -113,7 +113,6 @@ public class OffersWebView extends Activity {
                 pageFinished();
             }
             public boolean shouldOverrideUrlLoading (WebView view, String url) {
-                System.out.println("*** shouldoverride " + url);
                 // market urls start with market://details?id=<package_name>
                 if (url != null && url.startsWith("market:"))
                     didClickOffer(url);
@@ -146,9 +145,6 @@ public class OffersWebView extends Activity {
         String url = URLUtil.constructG6URL(baseURL, params, nonSigParams,
                 secretKey);
         
-        System.out.println("Offers url:" + url);
-        
-        url = "http://192.168.2.102:8080/gateway/index.html";
         webview.loadUrl(url);
 
         // Set up the layout view with the button

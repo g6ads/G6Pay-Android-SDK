@@ -298,30 +298,14 @@ public class G6Pay implements G6AdvertiserIF, G6PublisherIF {
     }
     
 
-    /**
-     * Called when user selects an offer from the offers web view..
-     * @param ctx
-     * @param userId
-     * @param offerId
-     */
-    public static void userDidSelectOffer(Context ctx, String signature) {
-        G6Pay sdk = getG6PayInstance(ctx);
-        if (sdk == null) {
-            Log.e(mLogStr, "Error tracking offers.");
-            return;
-        }
-        
-        sdk.didSelectOffer(signature);
-    }
-
+    // Callbacks from offers page
+    
     public void didCloseOffers() {
         System.out.println("*** didCloseOffers");
     }
+    
     public void didSelectOffer(String signature) {
-        
         System.out.println("*** didSelectOffer " + signature);
-        // TODO Auto-generated method stub
-        
     }
 
 }
