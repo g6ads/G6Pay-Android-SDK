@@ -18,7 +18,8 @@
         <activity android:name="com.g6pay.sdk.OffersWebView"
                   android:configChanges="keyboardHidden|orientation" />
         <meta-data android:name="G6_APP_ID" android:value="YOUR_APP_ID_HERE"/>
-        <meta-data android:name="G6_SECRET_KEY" android:value="YOUR_SECRET_KEY_HERE"/>
+        <meta-data android:name="G6_SECRET_KEY"
+                  android:value="YOUR_SECRET_KEY_HERE"/>
         <meta-data android:name="G6_APP_ID" android:value="329"/>
         <meta-data android:name="G6_SECRET_KEY" android:value="7594d9ea086065971.26202589"/>
     <!--  *** End G6 Specific Parameters *** -->
