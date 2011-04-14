@@ -1,0 +1,25 @@
+#!/bin/sh
+
+PACKAGE_NAME=G6SDKAndroidv
+VER=$1
+
+if [ -z $1 ]; then
+  echo "You must specify a version"
+  echo "Usage $0 <version> (Should probably match the version in com.g6pay.sdk.G6Pay.VERSION"
+  exit 1
+fi
+
+FOLDER=dist/$PACKAGE_NAME$VER
+rm -rf dist
+mkdir -p $FOLDER
+mkdir -p $FOLDER/samplesrc
+
+cp -rp G6SDK/AndroidManifest.xml $FOLDER/samplesrc/
+cp -rp G6SDK/doc $FOLDER/
+cp -rp G6SDK/src $FOLDER/
+cp README $FOLDER
+cp g6*.pdf $FOLDER
+
+cd dist && tar -zcf $PACKAGE_NAME$VER.tgz $PACKAGE_NAME$VER
+
+echo "Package available at dist/$PACKAGE_NAME$VER.tgz"
