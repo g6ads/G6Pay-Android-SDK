@@ -165,12 +165,15 @@ public class ResponseParser {
             ArrayList<TransactionDTO> result = new ArrayList<TransactionDTO>();
 
             response = response.trim();
+            
+            // chop the [ and ]
             String listOfDicts = response.substring(1, response.length());
 
             StringBuffer keyBuf = new StringBuffer();
             StringBuffer valBuf = new StringBuffer();
 
             boolean valueIsNum = false;
+            boolean valueIsNull = false;
             String key = null;
             String val = null;
             int state = 0;
@@ -197,6 +200,7 @@ public class ResponseParser {
                 case 0: // new DTO
                     // reset everything
                     valueIsNum = false;
+                    valueIsNull = false;
                     keyBuf = new StringBuffer();
                     valBuf = new StringBuffer();
                     key = null;
@@ -228,8 +232,13 @@ public class ResponseParser {
                         valBuf.append(c);
                         state++;
                     }
+                    if (c == 'n') {
+                        valueIsNull = true;
+                        state++;
+                    }
                     if (c == '"') {
                         valueIsNum = false;
+                        valueIsNull = false;
                         state++;
                     }
                     break;
@@ -244,6 +253,15 @@ public class ResponseParser {
                             i--;
                             nextState = true;
                         }
+                    } else if (valueIsNull) {
+                        if (c == 'n' || c == 'u' || c == 'l') {
+                            // still null
+                        } else {
+                            // we decrement, because we're on a char we
+                            // don't understand
+                            i--;
+                            nextState = true;
+                        }
                     } else {
                         if (c == '"' && oldC != '\\') {
                             nextState = true;
@@ -252,8 +270,10 @@ public class ResponseParser {
                         }
                     }
                     if (nextState) {
-                        val = valBuf.toString();
-                        dict.put(key.trim(), val.trim());
+                        if (!valueIsNull) {
+                            val = valBuf.toString();
+                            dict.put(key.trim(), val.trim());
+                        }
                         state++;
                         keyBuf = new StringBuffer();
                         valBuf = new StringBuffer();
