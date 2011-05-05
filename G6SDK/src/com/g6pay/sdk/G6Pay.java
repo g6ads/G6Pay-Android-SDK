@@ -231,6 +231,7 @@ public class G6Pay implements G6AdvertiserIF, G6PublisherIF {
 
         HashMap<String, String> nonSigParams = new HashMap<String, String>();
         nonSigParams.put(G6Params.G6_PARAM_PLATFORM, G6Params.PLATFORM_ID_ANDROID);
+        nonSigParams.put(G6Params.G6_PARAM_APP_ID, this.APP_ID);
         
         SimpleHTTPRequest request = new SimpleHTTPRequest(
                 G6Params.G6_API_URL_ISCOMPLETED, params, nonSigParams,
